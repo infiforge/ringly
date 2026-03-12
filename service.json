@@ -1,0 +1,19 @@
+{
+  "name": "ringly",
+  "displayName": "Ringly",
+  "description": "Call tracking and attribution system for Google Ads campaigns with offline conversion tracking",
+  "location": "internal",
+  "portRange": {
+    "start": 8010,
+    "end": 8099
+  },
+  "systemd": {
+    "serviceName": "ringly",
+    "serviceTemplate": "ringly@{port}.service"
+  },
+  "healthEndpoint": "/health",
+  "apiEndpoints": {
+    "metrics": "/api/service/metrics",
+    "shutdown": "/api/service/shutdown"
+  }
+}

@@ -1,0 +1,16 @@
+# Deno runtime for CallAttribution upload scheduler
+FROM denoland/deno:alpine-1.40.0
+
+WORKDIR /app
+
+# Copy configuration files
+COPY deno.json .
+
+# Copy source code
+COPY . .
+
+# Cache dependencies
+RUN deno cache scheduler.ts
+
+# Run the scheduler
+CMD ["deno", "run", "-A", "scheduler.ts"]

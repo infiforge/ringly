@@ -1,0 +1,63 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default"
+    ],
+    "sharedGlobals": []
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "test": {
+      "dependsOn": ["build"]
+    }
+  },
+  "projects": {
+    "backend": {
+      "root": "backend",
+      "projectType": "application",
+      "targets": {
+        "serve": {
+          "command": "cd backend && deno task serve"
+        },
+        "build": {
+          "command": "cd backend && deno task build"
+        },
+        "test": {
+          "command": "cd backend && deno task test"
+        }
+      }
+    },
+    "frontend": {
+      "root": "frontend",
+      "projectType": "application",
+      "targets": {
+        "serve": {
+          "command": "cd frontend && flutter run"
+        },
+        "build": {
+          "command": "cd frontend && flutter build"
+        },
+        "test": {
+          "command": "cd frontend && flutter test"
+        }
+      }
+    },
+    "tracker": {
+      "root": "tracker",
+      "projectType": "library",
+      "targets": {
+        "build": {
+          "command": "cd tracker && npm run build"
+        },
+        "test": {
+          "command": "cd tracker && npm test"
+        }
+      }
+    }
+  }
+}

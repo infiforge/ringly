@@ -1,0 +1,37 @@
+{
+  "name": "callattribution",
+  "version": "1.0.0",
+  "description": "Self-hosted call attribution system for Google Ads campaigns in Kenya and African markets",
+  "private": true,
+  "scripts": {
+    "serve:backend": "cd backend && deno task serve",
+    "serve:frontend": "cd frontend && flutter run",
+    "serve": "nx run-many --target=serve --projects=backend,frontend",
+    "build": "nx run-many --target=build --all",
+    "test": "nx run-many --target=test --all",
+    "lint": "nx run-many --target=lint --all",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:logs": "pm2 logs",
+    "pm2:stop": "pm2 stop all"
+  },
+  "devDependencies": {
+    "@nx/deno": "^17.0.0",
+    "nx": "^17.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/infiforge/callattribution.git"
+  },
+  "keywords": [
+    "call-attribution",
+    "google-ads",
+    "gclid",
+    "offline-conversions",
+    "kenya",
+    "africa",
+    "dtmf",
+    "ivr"
+  ],
+  "author": "Infiforge",
+  "license": "UNLICENSED"
+}

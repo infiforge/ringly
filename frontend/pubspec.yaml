@@ -1,0 +1,77 @@
+name: ringly
+description: Ringly - Call Attribution System for Google Ads
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  
+  # State Management
+  provider: ^6.1.1
+  flutter_riverpod: ^2.4.9
+  
+  # Navigation
+  auto_route: ^7.8.4
+  
+  # HTTP & Networking
+  http: ^1.1.0
+  dio: ^5.4.0
+  
+  # Storage
+  shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  
+  # UI Components
+  fl_chart: ^0.66.0
+  syncfusion_flutter_charts: ^24.1.41
+  data_table_2: ^2.5.9
+  
+  # Date & Time
+  intl: ^0.19.0
+  jiffy: ^6.2.2
+  
+  # Utilities
+  logger: ^2.0.2+1
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+  equatable: ^2.0.5
+  
+  # Authentication
+  google_sign_in: ^6.2.1
+  url_launcher: ^6.2.5
+  protocol_handler: ^0.2.0
+  crypto: ^3.0.3
+  
+  # Desktop Support
+  window_manager: ^0.3.7
+  bitsdojo_window: ^0.1.6
+  tray_manager: ^0.2.1
+  
+  # Notifications
+  flutter_local_notifications: ^16.3.2
+  toastification: ^1.2.1
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  auto_route_generator: ^7.3.2
+  build_runner: ^2.4.8
+  freezed: ^2.4.6
+  json_serializable: ^6.7.1
+  hive_generator: ^2.0.1
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/

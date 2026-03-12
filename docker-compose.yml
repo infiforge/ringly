@@ -1,0 +1,102 @@
+version: "3.8"
+
+services:
+  # MongoDB - Primary database for call logs, sessions, conversions
+  mongodb:
+    image: mongo:7.0
+    container_name: callattribution-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-changeme}
+      MONGO_INITDB_DATABASE: callattribution
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./docker/mongodb/init.js:/docker-entrypoint-initdb.d/init.js:ro
+    networks:
+      - callattribution-network
+
+  # Redis - Session cache and GCLID storage
+  redis:
+    image: redis:7-alpine
+    container_name: callattribution-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - callattribution-network
+
+  # Backend API Server
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: callattribution-backend
+    restart: unless-stopped
+    environment:
+      PORT: 8080
+      APP_ENV: production
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/callattribution?authSource=admin
+      MONGODB_DATABASE_NAME: callattribution
+      REDIS_URL: redis://redis:6379
+      GOOGLE_ADS_API_VERSION: ${GOOGLE_ADS_API_VERSION:-v23}
+      GOOGLE_ADS_DEVELOPER_TOKEN: ${GOOGLE_ADS_DEVELOPER_TOKEN}
+      GOOGLE_ADS_CUSTOMER_ID: ${GOOGLE_ADS_CUSTOMER_ID}
+      GOOGLE_ADS_MANAGER_ACCOUNT_ID: ${GOOGLE_ADS_MANAGER_ACCOUNT_ID}
+      GOOGLE_ADS_CONVERSION_ACTION: ${GOOGLE_ADS_CONVERSION_ACTION}
+      CONVERSION_CURRENCY_CODE: ${CONVERSION_CURRENCY_CODE:-KES}
+      CONVERSION_TIMEZONE: ${CONVERSION_TIMEZONE:-Africa/Nairobi}
+      JWT_SECRET: ${JWT_SECRET:-changeme}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - callattribution-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Conversion Upload Scheduler
+  # Runs every 5 minutes to process pending conversions
+  upload-scheduler:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.scheduler
+    container_name: callattribution-scheduler
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/callattribution?authSource=admin
+      REDIS_URL: redis://redis:6379
+      GOOGLE_ADS_API_VERSION: ${GOOGLE_ADS_API_VERSION:-v23}
+      GOOGLE_ADS_DEVELOPER_TOKEN: ${GOOGLE_ADS_DEVELOPER_TOKEN}
+      GOOGLE_ADS_CUSTOMER_ID: ${GOOGLE_ADS_CUSTOMER_ID}
+      GOOGLE_ADS_CONVERSION_ACTION: ${GOOGLE_ADS_CONVERSION_ACTION}
+      UPLOAD_BATCH_SIZE: ${UPLOAD_BATCH_SIZE:-500}
+      UPLOAD_INTERVAL_MS: ${UPLOAD_INTERVAL_MS:-300000}
+    depends_on:
+      - mongodb
+      - redis
+      - backend
+    networks:
+      - callattribution-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  callattribution-network:
+    driver: bridge
