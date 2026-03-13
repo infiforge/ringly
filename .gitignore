@@ -92,3 +92,8 @@ ecosystem.config.js
 # Redis
 *.rdb
 appendonly.aof
+
+# Security - Never commit secrets
+**/config.json
+**/certs/
+**/*.pem
