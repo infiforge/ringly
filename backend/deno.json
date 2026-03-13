@@ -1,9 +1,9 @@
 {
   "lock": false,
-  "nodeModulesDir": false,
   "tasks": {
-    "serve": "deno run --allow-net --allow-read --allow-env --allow-sys --watch backend/server.ts",
-    "build": "deno compile --allow-net --allow-read --allow-env --allow-sys -o dist/callattribution backend/server.ts",
+    "serve": "deno run --allow-net --allow-read --allow-env --allow-sys --watch server.ts",
+    "build": "deno compile --allow-net --allow-read --allow-env --allow-sys -o dist/ringly server.ts",
+    "build:frontend": "cd ../frontend && flutter build web --release && rm -rf ../backend/www/* && cp -r build/web/* ../backend/www/",
     "test": "deno test --allow-net --allow-read --allow-env",
     "fmt": "deno fmt",
     "lint": "deno lint"
@@ -11,9 +11,11 @@
   "imports": {
     "hono": "https://deno.land/x/hono@v3.12.0/mod.ts",
     "hono/": "https://deno.land/x/hono@v3.12.0/",
+    "hono/middleware/cors": "https://deno.land/x/hono@v3.12.0/middleware/cors/index.ts",
+    "hono/middleware/logger": "https://deno.land/x/hono@v3.12.0/middleware/logger/index.ts",
     "@hono/zod-validator": "https://deno.land/x/hono_zod_validator@v0.2.2/mod.ts",
     "zod": "https://deno.land/x/zod@v3.22.4/mod.ts",
-    "mongodb": "https://deno.land/x/mongo@v0.33.0/mod.ts",
+    "mongo": "https://deno.land/x/mongo@v0.34.0/mod.ts",
     "redis": "https://deno.land/x/redis@v0.37.0/mod.ts",
     "jose": "https://deno.land/x/jose@v5.2.0/index.ts",
     "djwt": "https://deno.land/x/djwt@v3.0.2/mod.ts",

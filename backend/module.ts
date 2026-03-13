@@ -1,5 +1,5 @@
-import type { MiddlewareHandler } from "hono";
-// StatusService defined below
+import { logger } from "./services/logger.ts";
+import { StatusService } from "./services/status.ts";
 
 export enum ModuleStatus {
   pending = "pending",
@@ -9,18 +9,28 @@ export enum ModuleStatus {
   stopped = "stopped",
 }
 
+export interface ModuleState {
+  state: ModuleStatus;
+  progress: number;
+  message?: string;
+  error?: string;
+}
+
 export abstract class ServiceModule {
   readonly id: string;
   readonly name: string;
   readonly dependencies: string[];
 
-  protected status: ModuleStatus = ModuleStatus.pending;
+  protected status: ModuleState;
   protected started: boolean = false;
+  protected statusService: StatusService;
 
-  constructor(id: string, name: string, dependencies: string[] = []) {
+  constructor(id: string, name: string, dependencies: string[] = [], statusService: StatusService) {
     this.id = id;
     this.name = name;
     this.dependencies = dependencies;
+    this.statusService = statusService;
+    this.status = { state: ModuleStatus.pending, progress: 0, message: 'Waiting to start' };
   }
 
   // Set status service after construction (injection)
@@ -29,27 +39,40 @@ export abstract class ServiceModule {
   }
 
   // Lifecycle hooks
-  async init(): Promise<void> {
-    this.status = ModuleStatus.initializing;
+  abstract init(): Promise<void>;
+  abstract start(): Promise<void>;
+  abstract stop(): Promise<void>;
+
+  // Helper methods for common status transitions
+  protected setInitializing(message?: string): void {
+    this.status = { state: ModuleStatus.initializing, progress: 0, message: message || 'Initializing...' };
+    logger.info(`${this.name} initializing${message ? ': ' + message : ''}`);
   }
 
-  async start(): Promise<void> {
+  protected setProgress(percent: number, message?: string): void {
+    this.status.progress = percent;
+    if (message) this.status.message = message;
+  }
+
+  protected setReady(message?: string): void {
+    this.status = { state: ModuleStatus.ready, progress: 100, message: message || 'Ready' };
     this.started = true;
-    this.status = ModuleStatus.ready;
+    logger.success(`${this.name} ready${message ? ': ' + message : ''}`);
   }
 
-  async stop(): Promise<void> {
+  protected setStopped(message?: string): void {
+    this.status = { state: ModuleStatus.stopped, progress: 0, message: message || 'Stopped' };
     this.started = false;
-    this.status = ModuleStatus.stopped;
+    logger.info(`${this.name} stopped${message ? ': ' + message : ''}`);
   }
 
   // Status getters
-  getStatus(): ModuleStatus {
+  getStatus(): ModuleState {
     return this.status;
   }
 
   isReady(): boolean {
-    return this.status === ModuleStatus.ready;
+    return this.status.state === ModuleStatus.ready;
   }
 
   isStarted(): boolean {
@@ -61,33 +84,14 @@ export abstract class ServiceModule {
   }
 
   // Error handling
-  setError(error: Error): void {
-    this.status = ModuleStatus.error;
-    console.error(`Module ${this.name} (${this.id}) error:`, error);
-  }
-}
-
-// Simple status service implementation
-export class StatusService {
-  private modules: Map<string, ServiceModule> = new Map();
-
-  registerModule(module: ServiceModule): void {
-    this.modules.set(module.id, module);
-  }
-
-  getModule(id: string): ServiceModule | undefined {
-    return this.modules.get(id);
-  }
-
-  getAllModules(): ServiceModule[] {
-    return Array.from(this.modules.values());
-  }
-
-  getReadyModules(): ServiceModule[] {
-    return this.getAllModules().filter((m) => m.isReady());
-  }
-
-  areAllReady(): boolean {
-    return this.getAllModules().every((m) => m.isReady());
+  setError(error: Error | string, message?: string): void {
+    const errorMsg = typeof error === 'string' ? error : error.message;
+    this.status = {
+      state: ModuleStatus.error,
+      progress: 0,
+      error: errorMsg,
+      message: message || 'Module failed to start',
+    };
+    logger.error(`${this.name} failed: ${errorMsg}`);
   }
 }

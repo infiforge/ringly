@@ -1,13 +1,14 @@
 {
-    "name": "ringly",
-    "short_name": "ringly",
+    "name": "Ringly - Call Attribution",
+    "short_name": "Ringly",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#1a237e",
+    "theme_color": "#1a237e",
+    "description": "Call Attribution System for Google Ads - Track offline conversions from phone calls",
+    "orientation": "any",
     "prefer_related_applications": false,
+    "categories": ["business", "productivity", "utilities"],
     "icons": [
         {
             "src": "icons/Icon-192.png",
@@ -30,6 +31,23 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        }
+    ],
+    "screenshots": [],
+    "shortcuts": [
+        {
+            "name": "Dashboard",
+            "short_name": "Dashboard",
+            "description": "View call attribution dashboard",
+            "url": "/#/dashboard",
+            "icons": [{"src": "icons/Icon-192.png", "sizes": "192x192"}]
+        },
+        {
+            "name": "Campaigns",
+            "short_name": "Campaigns",
+            "description": "Manage ad campaigns",
+            "url": "/#/campaigns",
+            "icons": [{"src": "icons/Icon-192.png", "sizes": "192x192"}]
         }
     ]
 }

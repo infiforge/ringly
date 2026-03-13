@@ -1,4 +1,4 @@
-import { type Database } from "mongodb";
+import { type Database } from "mongo";
 import {
   AllowedRouteTypes,
   UniversalRoute,

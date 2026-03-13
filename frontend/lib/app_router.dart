@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'pages/admin/admin_page.dart';
 import 'pages/auth/auth_page.dart';
 import 'pages/home/home_page.dart';
 import 'pages/setup/setup_page.dart';
@@ -31,47 +32,61 @@ class AppRouter extends _$AppRouter {
 
   @override
   List<AutoRoute> get routes => [
-    AutoRoute(
-      path: '/',
-      page: HomeRoute.page,
-      initial: true,
-      fullMatch: true,
-      guards: [
-        PlatformGuard(blockedPlatforms: [AppPlatform.web]),
-        SetupGuard(),
-        AuthGuard(),
-      ],
-    ),
-    AutoRoute(
-      path: '/auth',
-      page: AuthRoute.page,
-      fullMatch: false,
-      guards: [
-        PlatformGuard(blockedPlatforms: [AppPlatform.web]),
-        SetupGuard(),
-      ],
-    ),
-    AutoRoute(
-      path: '/setup',
-      page: SetupRoute.page,
-      guards: [
-        PlatformGuard(blockedPlatforms: [AppPlatform.web, AppPlatform.android, AppPlatform.ios]),
-      ],
-    ),
-    AutoRoute(
-      path: '/website',
-      page: WebsiteRoute.page,
-      guards: [
-        PlatformGuard(blockedPlatforms: [
-          AppPlatform.android,
-          AppPlatform.ios,
-          AppPlatform.windows,
-          AppPlatform.macos,
-          AppPlatform.linux,
-        ]),
-      ],
-    ),
-  ];
+        AutoRoute(
+          path: '/',
+          page: HomeRoute.page,
+          initial: true,
+          fullMatch: true,
+          guards: [
+            PlatformGuard(blockedPlatforms: [AppPlatform.web]),
+            SetupGuard(),
+            AuthGuard(),
+          ],
+        ),
+        AutoRoute(
+          path: '/admin',
+          page: AdminRoute.page,
+          guards: [
+            PlatformGuard(blockedPlatforms: [AppPlatform.web]),
+            SetupGuard(),
+            AuthGuard(),
+            AdminGuard(),
+          ],
+        ),
+        AutoRoute(
+          path: '/auth',
+          page: AuthRoute.page,
+          fullMatch: false,
+          guards: [
+            PlatformGuard(blockedPlatforms: [AppPlatform.web]),
+            SetupGuard(),
+          ],
+        ),
+        AutoRoute(
+          path: '/setup',
+          page: SetupRoute.page,
+          guards: [
+            PlatformGuard(blockedPlatforms: [
+              AppPlatform.web,
+              AppPlatform.android,
+              AppPlatform.ios
+            ]),
+          ],
+        ),
+        AutoRoute(
+          path: '/website',
+          page: WebsiteRoute.page,
+          guards: [
+            PlatformGuard(blockedPlatforms: [
+              AppPlatform.android,
+              AppPlatform.ios,
+              AppPlatform.windows,
+              AppPlatform.macos,
+              AppPlatform.linux,
+            ]),
+          ],
+        ),
+      ];
 }
 
 // PlatformGuard: Blocks access based on current platform
@@ -98,7 +113,7 @@ class PlatformGuard extends AutoRouteGuard {
     if (blockedPlatforms.contains(currentPlatform)) {
       // Current platform is blocked: Redirect to appropriate page
       resolver.next(false);
-      
+
       if (currentPlatform == AppPlatform.web) {
         // Web goes to website
         router.replaceAll([const WebsiteRoute()]);
@@ -155,7 +170,7 @@ class AuthGuard extends AutoRouteGuard {
     if (context != null) {
       final authService = authServiceSingleton;
       final isAuthenticated = await authService.isAuthenticated();
-      
+
       if (isAuthenticated) {
         // User is authenticated: Allow access
         resolver.next(true);
@@ -167,6 +182,32 @@ class AuthGuard extends AutoRouteGuard {
     } else {
       resolver.next(false);
       router.replace(const AuthRoute());
+    }
+  }
+}
+
+// AdminGuard: Blocks access if user is not an admin
+// Redirects to home page
+class AdminGuard extends AutoRouteGuard {
+  @override
+  void onNavigation(NavigationResolver resolver, StackRouter router) async {
+    final context = router.navigatorKey.currentContext;
+    if (context != null) {
+      final authService = authServiceSingleton;
+      final user = await authService.getUser();
+      final email = user?['email'] ?? '';
+
+      if (AuthService.adminEmails.contains(email)) {
+        // User is admin: Allow access
+        resolver.next(true);
+      } else {
+        // User is not admin: Block access and redirect to home
+        resolver.next(false);
+        router.replace(const HomeRoute());
+      }
+    } else {
+      resolver.next(false);
+      router.replace(const HomeRoute());
     }
   }
 }

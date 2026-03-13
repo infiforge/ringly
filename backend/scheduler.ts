@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient } from "mongo";
 import { connect } from "redis";
 import configFile from "./config.json" with { type: "json" };
 import { UploadPipelineService } from "./services/upload-pipeline/service.ts";

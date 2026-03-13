@@ -53,7 +53,7 @@ export class UniversalRoute implements UniversalRouteOptions {
   method: UniversalRouteMethod;
   description: string;
   graphqlTypeDefs: string;
-  middlewares: Middleware[] | undefined;
+  middlewares?: Middleware[];
   func: (input: any, context: any) => Promise<any>;
   listen: ((input: any, context: any) => Promise<any>) | undefined;
 

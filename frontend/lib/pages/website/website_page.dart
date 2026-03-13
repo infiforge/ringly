@@ -519,8 +519,11 @@ class _HowItWorksSection extends StatelessWidget {
             subtitle: 'Get started with Ringly in three simple steps.',
           ),
           const SizedBox(height: 64),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            spacing: 16,
+            runSpacing: 24,
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               _StepCard(
                 number: '01',

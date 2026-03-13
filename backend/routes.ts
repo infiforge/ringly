@@ -1,12 +1,14 @@
 import { Hono, type Context as HonoContext } from "hono";
-import { cors } from "hono/cors";
-import { logger as honoLogger } from "hono/logger";
+import { cors } from "hono/middleware/cors";
+import { logger as honoLogger } from "hono/middleware/logger";
+import { type Database } from "mongo";
+import { type Redis } from "redis";
 import {
   AllowedRouteTypes,
   type UniversalRoute,
   UniversalRouteMethod,
 } from "./interfaces/route.ts";
-import { StatusService } from "./module.ts";
+import { StatusService } from "./services/status-service.ts";
 import { authRoutes } from "./routes/auth.ts";
 import { campaignsRoutes } from "./routes/campaigns.ts";
 import { callsRoutes } from "./routes/calls.ts";
@@ -18,10 +20,14 @@ export class AppRoutes {
   public routes!: Map<string, Array<UniversalRoute>>;
   public app!: Hono;
   private statusService: StatusService;
+  private mongo: Database | null;
+  private redis: Redis | null;
   private routeCounts!: { http: number; graphql: number; websocket: number };
 
-  constructor(statusService: StatusService) {
+  constructor(statusService: StatusService, mongo: Database | null = null, redis: Redis | null = null) {
     this.statusService = statusService;
+    this.mongo = mongo;
+    this.redis = redis;
     this.routeCounts = { http: 0, graphql: 0, websocket: 0 };
     this.initialize();
   }
@@ -156,5 +162,16 @@ export class AppRoutes {
 
   getRouteCounts() {
     return { ...this.routeCounts };
+  }
+
+  /**
+   * Setup routes on an external Hono app (used by RoutesModule)
+   */
+  async setupRoutes(externalApp: Hono): Promise<void> {
+    // Use the external app instead of creating our own
+    this.app = externalApp;
+    
+    // Register all routes
+    this.registerAllRoutes();
   }
 }

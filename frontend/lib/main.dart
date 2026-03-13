@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:ringly/app_router.dart';
+import 'package:ringly/theme/app_theme.dart';
+import 'package:ringly/providers/app_providers.dart';
 import 'package:ringly/services/logger_service.dart';
 import 'package:ringly/services/auth_service.dart';
 import 'package:ringly/services/storage_service.dart';
@@ -71,24 +73,14 @@ class RinglyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
       title: 'Ringly',
       debugShowCheckedModeBanner: kDebugMode,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6B4EFF),
-          brightness: Brightness.light,
-        ),
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6B4EFF),
-          brightness: Brightness.dark,
-        ),
-      ),
+      themeMode: themeMode,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       routerConfig: router.config(),
     );
   }
